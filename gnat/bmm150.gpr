@@ -1,0 +1,34 @@
+--  SPDX-FileCopyrightText: 2023 Max Reznik <reznikmm@gmail.com>
+-- 
+--  SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+----------------------------------------------------------------
+
+with "bmm150_config.gpr";
+project BMM150 is
+
+   for Library_Name use "bmm150";
+   for Library_Version use Project'Library_Name & ".so." & BMM150_Config.Crate_Version;
+
+   for Source_Dirs use ("../source", "../source/impl");
+   for Object_Dir use "../.obj/" & BMM150_Config.Build_Profile;
+   for Create_Missing_Dirs use "True";
+   for Library_Dir use "../.lib";
+
+   type Library_Type_Type is ("relocatable", "static", "static-pic");
+   Library_Type : Library_Type_Type :=
+     external ("bmm150_LIBRARY_TYPE", external ("LIBRARY_TYPE", "static"));
+   for Library_Kind use Library_Type;
+
+   package Compiler is
+      for Default_Switches ("Ada") use BMM150_Config.Ada_Compiler_Switches;
+   end Compiler;
+
+   package Binder is
+      for Switches ("Ada") use ("-Es"); --  Symbolic traceback
+   end Binder;
+
+   package Install is
+      for Artifacts (".") use ("share");
+   end Install;
+
+end BMM150;
