@@ -51,7 +51,7 @@ package BMM150.I2C is
    --  Check if a measurement is in progress
 
    procedure Read_Measurement
-     (Value   : out Density_Vector;
+     (Value   : out Magnetic_Field_Vector;
       Trim    : Trim_Registers;
       Success : out Boolean);
    --  Read the measurement values from the sensor and make the temperature

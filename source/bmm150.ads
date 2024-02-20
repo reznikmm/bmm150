@@ -61,11 +61,11 @@ package BMM150 is
 
    Small_4 : constant := 1.0 / 2.0**4;
 
-   type Density is delta Small_4 range -2048.0 .. 2048.0 - Small_4;
+   type Magnetic_Field is delta Small_4 range -2048.0 .. 2048.0 - Small_4;
    --  Magnetic flux density in uT (micro-tesla)
 
-   type Density_Vector is record
-      X, Y, Z : Density;
+   type Magnetic_Field_Vector is record
+      X, Y, Z : Magnetic_Field;
    end record;
    --  3D vector of magnetic flux density in uT (micro-tesla)
 

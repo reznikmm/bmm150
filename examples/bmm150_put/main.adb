@@ -25,7 +25,7 @@ procedure Main is
 
    Ok    : Boolean;
    Trim  : BMM150.Trim_Registers;
-   Value : BMM150.Density_Vector;
+   Value : BMM150.Magnetic_Field_Vector;
 
 begin
    STM32.Board.Initialize_LEDs;

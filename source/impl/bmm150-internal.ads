@@ -67,7 +67,7 @@ package BMM150.Internal is
    procedure Read_Measurement
      (Device  : Device_Context;
       Trim    : Trim_Registers;
-      Value   : out Density_Vector;
+      Value   : out Magnetic_Field_Vector;
       Success : out Boolean);
    --  Read the raw measurement values from the sensor
 

@@ -21,7 +21,7 @@ package body BMM150.Internal is
       Reg    : Trim_Registers;
       X_1    : Interfaces.Integer_8;
       X_2    : Interfaces.Integer_8;
-      Result : out Density)
+      Result : out Magnetic_Field)
         with SPARK_Mode, Inline;
    --  Part of compensation procedure for X and Y
 
@@ -29,7 +29,7 @@ package body BMM150.Internal is
      (Z      : Raw_Z;
       Hall   : Raw_Hall;
       Reg    : Trim_Registers;
-      Result : out Density)
+      Result : out Magnetic_Field)
         with SPARK_Mode, Inline;
    --  Part of compensation procedure for Z
 
@@ -174,7 +174,7 @@ package body BMM150.Internal is
       Reg    : Trim_Registers;
       X_1    : Interfaces.Integer_8;
       X_2    : Interfaces.Integer_8;
-      Result : out Density)
+      Result : out Magnetic_Field)
    is
       pragma SPARK_Mode;
       pragma Suppress (All_Checks);
@@ -203,7 +203,7 @@ package body BMM150.Internal is
       Small_2 : constant := 1.0 / 2.0;
       type Fixed_2 is delta Small_2 range -64.0 .. 64.0 - Small_2;
 
-      Field_Small : constant Fixed_16 := Density'Small;
+      Field_Small : constant Fixed_16 := Magnetic_Field'Small;
 
       XY2 : constant Fixed_7 := Fixed_7'Small * Integer (Reg.XY2);
       XY1 : constant Fixed_7 := Fixed_7'Small * Natural (Reg.XY1);
@@ -219,10 +219,12 @@ package body BMM150.Internal is
       A8 : constant Fixed_16 := A1 + Fixed_16 (X1);
 
    begin
-      if A8 in Fixed_16 (Density'First) .. Fixed_16 (Density'Last) then
-         Result := Density (A8);
+      if A8 in
+        Fixed_16 (Magnetic_Field'First) .. Fixed_16 (Magnetic_Field'Last)
+      then
+         Result := Magnetic_Field (A8);
       else
-         Result := Density'First;
+         Result := Magnetic_Field'First;
       end if;
    end Compensate_XY;
 
@@ -234,7 +236,7 @@ package body BMM150.Internal is
      (Z      : Raw_Z;
       Hall   : Raw_Hall;
       Reg    : Trim_Registers;
-      Result : out Density)
+      Result : out Magnetic_Field)
    is
       type Wide_Fixed_4 is delta Small_4
         range -2.0 ** 27 .. 2.0 ** 27 - Small_4;
@@ -279,10 +281,12 @@ package body BMM150.Internal is
 
       A5  : constant Wide_Fixed_4 := (Wide_Fixed_15 (ZZ - Z_4) - A4) / A3;
    begin
-      if A5 in Wide_Fixed_4 (Density'First) .. Wide_Fixed_4 (Density'Last) then
-         Result := Density (A5);
+      if A5 in Wide_Fixed_4 (Magnetic_Field'First) ..
+        Wide_Fixed_4 (Magnetic_Field'Last)
+      then
+         Result := Magnetic_Field (A5);
       else
-         Result := Density'First;
+         Result := Magnetic_Field'First;
       end if;
    end Compensate_Z;
 
@@ -308,7 +312,7 @@ package body BMM150.Internal is
    procedure Read_Measurement
      (Device  : Device_Context;
       Trim    : Trim_Registers;
-      Value   : out Density_Vector;
+      Value   : out Magnetic_Field_Vector;
       Success : out Boolean)
    is
       Raw    : Raw_Density_Vector;
@@ -328,7 +332,7 @@ package body BMM150.Internal is
          Compensate_XY (Raw.Y, A0, Trim, Trim.Y1, Trim.Y2, Value.Y);
          Compensate_Z (Raw.Z, R_Hall, Trim, Value.Z);
       else
-         Value := (others => Density'First);
+         Value := (others => Magnetic_Field'First);
          Success := False;
       end if;
    end Read_Measurement;
