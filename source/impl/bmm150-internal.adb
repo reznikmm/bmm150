@@ -96,7 +96,6 @@ package body BMM150.Internal is
       Success : out Boolean)
    is
       use Interfaces;
-      use type Byte;
 
       function Cast_8 is new Ada.Unchecked_Conversion (Byte, Integer_8);
 
@@ -148,7 +147,9 @@ package body BMM150.Internal is
             return;
          end if;
 
-         Value.Z1 := To_Unsigned (XY12 (XY12'First + 2), XY12 (XY12'First + 3));
+         Value.Z1 :=
+           To_Unsigned (XY12 (XY12'First + 2), XY12 (XY12'First + 3));
+
          Z2 := To_Integer (XY12 (XY12'First), XY12 (XY12'First + 1));
          Success := Z2 > 0;
          Value.Z2 := (if Z2 > 0 then Z2 else 1);
