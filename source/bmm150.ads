@@ -4,83 +4,93 @@
 ----------------------------------------------------------------
 
 with Interfaces;
-with HAL;
 
 package BMM150 is
    pragma Preelaborate;
    pragma Discard_Names;
 
+   type Power_Mode is (Normal, Forced, Sleep);
+
+   type Output_Data_Rate is range 2 .. 30
+     with Static_Predicate =>
+       Output_Data_Rate in 2 | 6 | 8 | 10 | 15 | 20 | 25 | 30;
+   --
+   --  Magnetometer output data rate (ODR) in Hz
+
+   subtype Repetition_Count is Positive range 1 .. 511
+     with Dynamic_Predicate => Repetition_Count mod 2 = 1;
+   --  FIXME: should be Static_Predicate when the compiler understand
+
+   type Setting is record
+      X_Y : Repetition_Count;
+      Z   : Positive range 1 .. 256;
+   end record;
+
+   function Max_Measurement_Time (Preset : Setting) return Positive
+     is (145 * Preset.X_Y + 500 * Preset.Z + 980);
+   --  The maximum selectable read-out frequency in forced mode in µs.
+
+   Low_Power_Preset        : constant Setting := (X_Y => 3, Z => 3);
+   --  Noise: 1.0/1.4 uT, current 0.17 mA at ODR 10 Hz
+
+   Regular_Preset          : constant Setting := (X_Y => 9, Z => 15);
+   --  Noise: 0.6/0.6 uT, current 0.50 mA at ODR 10 Hz
+
+   Enhanced_Regular_Preset : constant Setting := (X_Y => 15, Z => 27);
+   --  Noise: 0.5/0.5 uT, current 0.80 mA at ODR 10 Hz
+
+   High_Accuracy_Preset    : constant Setting := (X_Y => 15, Z => 27);
+   --  Noise: 0.3/0.3 uT, current 4.90 mA at ODR 20 Hz
+
+   use type Interfaces.Integer_16;
+   use type Interfaces.Unsigned_16;
+
+   type Trim_Registers is record
+      X1, Y1, X2, Y2 : Interfaces.Integer_8;
+      Z1 : Interfaces.Unsigned_16;
+      Z2 : Interfaces.Integer_16 range 1 .. 2 ** 15 - 1;
+      Z3, Z4 : Interfaces.Integer_16;
+      XY1  : Interfaces.Unsigned_8;
+      XY2  : Interfaces.Integer_8;
+      XYZ1 : Interfaces.Unsigned_16 range 1 .. 2 ** 15 - 1;
+   end record;
    --  Calibration constants per chip. Make visible to allow constant
    --  initialised to a value known in advance.
+   --
+   --  My guess, Z2 should be >=0 to avoid devide by zero in Z compensation.
 
-   type Measurement is private;
-   --  Raw values from the sensor
+   Small_4 : constant := 1.0 / 2.0**4;
 
-   type Deci_Celsius is delta 1.0 / 2 ** 9 range -99_0.00 .. 99_0.00;
-   --  1 degree celsius is 10 Deci_Celsius
+   type Density is delta Small_4 range -2048.0 .. 2048.0 - Small_4;
+   --  Magnetic flux density in uT (micro-tesla)
 
-   function Temperature
-     (Value       : Measurement;
-      Calibration : Calibration_Constants) return Deci_Celsius;
-   --  Get the temperature from raw values in 0.1 Celsius
+   type Density_Vector is record
+      X, Y, Z : Density;
+   end record;
+   --  3D vector of magnetic flux density in uT (micro-tesla)
 
-   Humidity_Small : constant := 1.0 / 2 ** 10;
+   subtype Raw_XY is Interfaces.Integer_16 range -(2 ** 12) .. 2 ** 12 - 1;
+   subtype Raw_Z  is Interfaces.Integer_16 range -(2 ** 14) .. 2 ** 14 - 1;
 
-   type Relative_Humidity is delta Humidity_Small range 0.0 .. 100.0;
-   --  Relative humidity in percent
+   type Raw_Density_Vector is record
+      X, Y : Raw_XY;
+      Z    : Raw_Z;
+   end record;
+   --  3D vector of magnetic flux density as provided by the sensor
 
-   function Humidity
-     (Value       : Measurement;
-      Temperature : Deci_Celsius;
-      Calibration : Calibration_Constants) return Relative_Humidity;
-   --  Get the humidity from raw values
+   subtype Raw_Hall is Interfaces.Unsigned_16 range 0 .. 2 ** 14 - 1;
+   --  Hall resistor as provided by the sensor
 
-   Pressure_Small : constant := 1.0 / 2 ** 8;
-
-   type Pressure_Pa is delta Pressure_Small range 30_000.0 .. 110_000.0;
-   --  Pressure in Pa
-
-   function Pressure
-     (Value       : Measurement;
-      Temperature : Deci_Celsius;
-      Calibration : Calibration_Constants) return Pressure_Pa;
-   --  Get the pressure from raw values
-
-   type Oversampling_Kind is (Skip, X1, X2, X4, X8, X16);
-   type IRR_Filter_Kind is (Off, X2, X4, X8, X16);
-   type Sensor_Mode is (Sleep, Forced, Normal);
-   --  Sensor modes. Sleep - sensor is off, Forced - measure once and go to
-   --  sleep, Normal - measure continuously.
-
-   type Standby_Duration is delta 0.5 range 0.5 .. 1000.0
-     with Static_Predicate =>
-       Standby_Duration in 0.5 | 10.0 | 20.0
-         | 62.5 | 125.0 | 250.0 | 500.0 | 1000.0;
-   --  Inactivity duration in ms
-
-   subtype Register_Address is Natural range 16#80# .. 16#FF#;
-   --  Sensor registers addresses
-
-   function Max_Measurement_Time
-     (Humidity    : Oversampling_Kind := X1;
-      Pressure    : Oversampling_Kind := X1;
-      Temperature : Oversampling_Kind := X1) return Positive;
-   --  Maximal measurement time in microseconds
-
-   function Typical_Measurement_Time
-     (Humidity    : Oversampling_Kind := X1;
-      Pressure    : Oversampling_Kind := X1;
-      Temperature : Oversampling_Kind := X1) return Positive;
-   --  Typical measurement time in microseconds
+   subtype I2C_Address_Range is Interfaces.Unsigned_8 range 16#10# .. 16#13#;
 
 private
 
-   for Sensor_Mode use (Sleep => 0, Forced => 1, Normal => 3);
+   BMM150_Chip_Id : constant := 16#32#;
 
-   type Measurement is record
-      Raw_Press : HAL.UInt20;
-      Raw_Temp  : HAL.UInt20;
-      Raw_Hum   : HAL.UInt16;
-   end record;
+   subtype Register_Address is Natural range 16#00# .. 16#7F#;
+   --  Sensor registers addresses
+
+   type Byte_Array is
+     array (Register_Address range <>) of Interfaces.Unsigned_8;
 
 end BMM150;
