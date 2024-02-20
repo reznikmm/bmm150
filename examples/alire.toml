@@ -12,7 +12,7 @@ maintainers-logins = ["reznikmm"]
 licenses = "Apache-2.0 WITH LLVM-exception"
 website = "https://github.com/reznikmm/bmm150"
 tags = ["sensor", "humidity", "temperature", "pressure", "driver"]
-project-files = ["bmm150_put/bmm150_put.gpr"]
+project-files = ["bmm150_put/bmm150_put.gpr", "bmm150_lcd/bmm150_lcd.gpr"]
 
 [configuration]
 generate_ada = false
