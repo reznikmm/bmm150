@@ -1,0 +1,141 @@
+# BMM150
+
+[![Build status](https://github.com/reznikmm/bmm150/actions/workflows/alire.yml/badge.svg)](https://github.com/reznikmm/bmm150/actions/workflows/alire.yml)
+[![Alire](https://img.shields.io/endpoint?url=https://alire.ada.dev/badges/bmm150.json)](https://alire.ada.dev/crates/bmm150.html)
+[![REUSE status](https://api.reuse.software/badge/github.com/reznikmm/bmm150)](https://api.reuse.software/info/github.com/reznikmm/bmm150)
+
+> Driver for BMM150 magnetic sensor.
+
+- [Datasheet](https://www.bosch-sensortec.com/products/motion-sensors/magnetometers/bmm150/)
+
+The sensor is available as a module for DIY projects from various
+manufacturers, such as
+[SEN0529 by DFRobot](https://wiki.dfrobot.com/SKU_SEN0529_Gravity_BMM150_Triple_Axis_Magnetometer),
+[WareShare](https://www.waveshare.com/wiki/BMM150_3-Axis_Magnetometer_Sensor) or
+[CJCMU-150](https://www.aliexpress.com/item/1005004432455077.html).
+It boasts 0.3μT resolution, low power consumption, a compact size, etc.
+
+The BMM150 driver enables the following functionalities:
+
+- Detect the presence of the sensor.
+- Perform soft reset
+- Configure the sensor (power mode, output data rate, repetitions per
+  measurement)
+- Conduct measurements as raw 13-bit (15 for Z) values and scaled values
+  with temperature compensation.
+
+## Install
+
+Add `bmm150` as a dependency to your crate with Alire:
+
+    alr with bmm150
+
+## Usage
+
+The driver implements two usage models: the generic package, which is more
+convenient when dealing with a single sensor, and the tagged type, which
+allows easy creation of objects for any number of sensors and uniform handling.
+
+Generic instantiation looks like this:
+
+```ada
+declare
+   package BMM150_I2C is new BMM150.Sensor
+     (I2C_Port    => STM32.Device.I2C_1'Access,
+      I2C_Address => 16#13#);
+
+begin
+   --  Power BMM150 on
+   BMM150_I2C.Suspend_Off (Ravenscar_Time.Delays, Ok);
+
+   if BMM150_I2C.Check_Chip_Id then
+      ...
+```
+
+While declaring object of the tagged type looks like this:
+
+```ada
+declare
+   Sensor : BMM150.Sensors.BMM150_Sensor
+     (I2C_Port => STM32.Device.I2C_1'Access,
+      I2C_Address => 16#13#);
+begin
+   --  Power BMM150 on
+   Sensor.Suspend_Off (Ravenscar_Time.Delays, Ok);
+
+   if Sensor.Check_Chip_Id then
+      ...
+```
+
+### Sensor Configuration
+
+To configure the sensor, use the `Set_Power_Mode` and `Set_Repetitions`
+procedures.
+
+Procedure `Set_Power_Mode` accepts `Mode` and `ODR` parameters:
+
+- `Mode`: power mode (`Normal`, `Forced`, `Sleep`)
+- `ODR`: Output Data Rate for `Normal` mode. Possible values 2, 6, 8,
+   10, 15, 20, 25, 30 Hz.
+
+An example:
+```ada
+Sensor.Set_Power_Mode
+  (Mode    => BMM150.Normal,
+   ODR     => 20,
+   Success => Ok);
+```
+
+Procedure `Set_Repetitions` accepts repetition counts for X/Y and Z axis.
+For presets are defined in `BMM150` for convenience' sake, but any value
+can be used.
+- `Low_Power_Preset`
+- `Regular_Preset`
+- `Enhanced_Regular_Preset`
+- `High_Accuracy_Preset`
+
+An example for `Regular_Preset` (X_Y => 9, Z => 15):
+```ada
+Sensor.Set_Repetitions
+  (BMM150.Regular_Preset,
+   Success => Ok);
+```
+
+### Read Measurement
+
+The best way to determine data readiness is through interrupts using
+a separate pin. Otherwise you can ascertain that the data is ready by
+waiting while `Measuring` returns `False`.
+
+Read raw data (as provided by the sensor) with the `Read_Raw_Measurement`
+procedure.
+
+Calling `Read_Measurement` returns scaled measurements in Gauss based on
+the current `Full_Range` setting.
+
+## Examples
+
+You need `Ada_Drivers_Library` in `adl` directory. Clone it then run Alire
+to build:
+
+    git clone https://github.com/AdaCore/Ada_Drivers_Library.git adl
+    cd examples
+    alr build
+
+### GNAT Studio
+
+Launch GNAT Studio with Alire:
+
+    cd examples; alr exec gnatstudio -- -P bmm150_put/bmm150_put.gpr
+
+### VS Code
+
+Make sure `alr` in the `PATH`.
+Open the `examples` folder in VS Code. Use pre-configured tasks to build
+projects and flash (openocd or st-util). Install Cortex Debug extension
+to launch pre-configured debugger targets.
+
+- [Simple example for STM32 F4VE board](examples/bmm150_put) - complete
+  example for the generic instantiation.
+- [Advanced example for STM32 F4VE board and LCD & touch panel](examples/bmm150_lcd) -
+  complete example of the tagged type usage.
