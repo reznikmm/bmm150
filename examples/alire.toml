@@ -1,0 +1,29 @@
+# SPDX-FileCopyrightText: 2023 Max Reznik <reznikmm@gmail.com>
+#
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
+name = "bmm150_examples"
+description = "Examples for bmm150 magnitometr"
+version = "1.0.0"
+
+authors = ["Max Reznik"]
+maintainers = ["Max Reznik <reznikmm@gmail.com>"]
+maintainers-logins = ["reznikmm"]
+licenses = "Apache-2.0 WITH LLVM-exception"
+website = "https://github.com/reznikmm/bmm150"
+tags = ["sensor", "humidity", "temperature", "pressure", "driver"]
+project-files = ["bmm150_put/bmm150_put.gpr"]
+
+[configuration]
+generate_ada = false
+generate_c = false
+generate_gpr = false
+
+[[depends-on]]
+gnat_arm_elf = "^12.2"
+bmm150 = "*"
+stm32_f4ve_full = "*"
+
+[[pins]]
+bmm150 = { path='..' }
+stm32_f4ve_full = { path='../adl/boards/stm32_f4ve' }
