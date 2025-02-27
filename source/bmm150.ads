@@ -83,14 +83,15 @@ package BMM150 is
 
    subtype I2C_Address_Range is Interfaces.Unsigned_8 range 16#10# .. 16#13#;
 
-private
+   subtype Byte is Interfaces.Unsigned_8;  --  Register value
+
+   subtype Register_Address is Natural range 16#00# .. 16#FF#;
+   --  Sensor's register address
+
+   type Byte_Array is array (Register_Address range <>) of Byte;
+   --  Bytes to be exchanged with registers. Index is a register address, while
+   --  elements are corresponding register values.
 
    BMM150_Chip_Id : constant := 16#32#;
-
-   subtype Register_Address is Natural range 16#00# .. 16#7F#;
-   --  Sensor registers addresses
-
-   type Byte_Array is
-     array (Register_Address range <>) of Interfaces.Unsigned_8;
 
 end BMM150;
