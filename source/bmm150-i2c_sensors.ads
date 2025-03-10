@@ -30,7 +30,6 @@ package BMM150.I2C_Sensors is
 
    procedure Suspend_On
      (Self    : BMM150_Sensor;
-      Timer   : not null HAL.Time.Any_Delays;
       Success : out Boolean);
    --  Put the chip into suspend mode
 

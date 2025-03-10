@@ -146,7 +146,8 @@ package body BMM150.I2C_Sensors is
       Timer   : not null HAL.Time.Any_Delays;
       Success : out Boolean) is
    begin
-      Sensor.Set_Suspend (Self, Timer, Suspend => False, Success => Success);
+      Sensor.Set_Suspend (Self, Suspend => False, Success => Success);
+      Timer.Delay_Milliseconds (3);
    end Suspend_Off;
 
    ----------------
@@ -155,10 +156,9 @@ package body BMM150.I2C_Sensors is
 
    procedure Suspend_On
      (Self    : BMM150_Sensor;
-      Timer   : not null HAL.Time.Any_Delays;
       Success : out Boolean) is
    begin
-      Sensor.Set_Suspend (Self, Timer, Suspend => True, Success => Success);
+      Sensor.Set_Suspend (Self, Suspend => True, Success => Success);
    end Suspend_On;
 
    -----------

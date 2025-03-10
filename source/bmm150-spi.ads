@@ -24,9 +24,7 @@ package BMM150.SPI is
    --  access to registers before this, so no other operations are working.
    --  It takes 3 ms to enter sleep mode.
 
-   procedure Suspend_On
-     (Timer   : not null HAL.Time.Any_Delays;
-      Success : out Boolean);
+   procedure Suspend_On (Success : out Boolean);
    --  Put the chip into suspend mode
 
    function Check_Chip_Id return Boolean;

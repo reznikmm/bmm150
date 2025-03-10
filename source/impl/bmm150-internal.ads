@@ -3,8 +3,6 @@
 --  SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 ----------------------------------------------------------------
 
-with HAL.Time;
-
 private generic
    type Device_Context (<>) is limited private;
 
@@ -29,7 +27,6 @@ package BMM150.Internal is
 
    procedure Set_Suspend
      (Device     : Device_Context;
-      Timer      : not null HAL.Time.Any_Delays;
       Suspend    : Boolean;
       SPI_3_Wire : Boolean := False;
       Success    : out Boolean);
