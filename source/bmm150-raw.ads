@@ -71,6 +71,18 @@ package BMM150.Raw is
    --  measurement or enable perpetual cycling of measurements and inactive
    --  periods.
 
+   subtype Interrupt_Setting_Data is Byte_Array (16#4E# .. 16#4E#);
+   --  Register (0x4E) contains control bits interrupt settings and axes enable
+   --  bits.
+
+   function Set_Interrupt_Setting
+     (Interrupt_Pin   : Boolean := False;
+      Data_Ready_Pin  : Boolean := False;
+      Data_Ready_High : Boolean := True;
+      Interrupt_High  : Boolean := True;
+      Interrupt_Latch : Boolean := True) return Interrupt_Setting_Data;
+   --  Change data ready (DRDY) and interrupt (INT) pins settings
+
    subtype Measurement_Data is Byte_Array (16#42# .. 16#49#);
    --  Magnetic field data, hall resistance and data ready status bit.
 
@@ -164,5 +176,18 @@ private
 
    function Is_Valid (Raw : Byte_Array) return Boolean is
       ((Raw (16#48#) and 16#FC#) /= 0 or Raw (16#49#) /= 0);
+
+   function Set_Interrupt_Setting
+     (Interrupt_Pin   : Boolean := False;
+      Data_Ready_Pin  : Boolean := False;
+      Data_Ready_High : Boolean := True;
+      Interrupt_High  : Boolean := True;
+      Interrupt_Latch : Boolean := True) return Interrupt_Setting_Data is
+       (Interrupt_Setting_Data'First =>
+          (if Interrupt_High  then 2**0 else 0) +
+          (if Interrupt_Latch then 2**1 else 0) +
+          (if Data_Ready_High then 2**2 else 0) +
+          (if Interrupt_Pin   then 2**6 else 0) +
+          (if Data_Ready_Pin  then 2**7 else 0));
 
 end BMM150.Raw;

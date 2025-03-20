@@ -129,6 +129,29 @@ package body BMM150.SPI_Sensors is
       Sensor.Set_Power_Mode (Self, Mode, ODR, Success);
    end Set_Power_Mode;
 
+   ---------------------------
+   -- Set_Interrupt_Setting --
+   ---------------------------
+
+   procedure Set_Interrupt_Setting
+     (Self            : BMM150_Sensor;
+      Interrupt_Pin   : Boolean := False;
+      Data_Ready_Pin  : Boolean := False;
+      Data_Ready_High : Boolean := True;
+      Interrupt_High  : Boolean := True;
+      Interrupt_Latch : Boolean := True;
+      Success         : out Boolean) is
+   begin
+      Sensor.Set_Interrupt_Setting
+        (Device            => Self,
+         Interrupt_Pin     => Interrupt_Pin,
+           Data_Ready_Pin  => Data_Ready_Pin,
+           Data_Ready_High => Data_Ready_High,
+           Interrupt_High  => Interrupt_High,
+           Interrupt_Latch => Interrupt_Latch,
+         Success           => Success);
+   end Set_Interrupt_Setting;
+
    ---------------------
    -- Set_Repetitions --
    ---------------------

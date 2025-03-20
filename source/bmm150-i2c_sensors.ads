@@ -56,6 +56,16 @@ package BMM150.I2C_Sensors is
       Success : out Boolean);
    --  Set the number of repetitions per measurement
 
+   procedure Set_Interrupt_Setting
+     (Self            : BMM150_Sensor;
+      Interrupt_Pin   : Boolean := False;
+      Data_Ready_Pin  : Boolean := False;
+      Data_Ready_High : Boolean := True;
+      Interrupt_High  : Boolean := True;
+      Interrupt_Latch : Boolean := True;
+      Success         : out Boolean);
+   --  Change data ready (DRDY) and interrupt (INT) pins settings
+
    function Measuring (Self : BMM150_Sensor) return Boolean;
    --  Check if a measurement is in progress
 

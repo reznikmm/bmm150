@@ -46,6 +46,15 @@ package BMM150.SPI is
       Success : out Boolean);
    --  Set the number of repetitions per measurement
 
+   procedure Set_Interrupt_Setting
+     (Interrupt_Pin   : Boolean := False;
+      Data_Ready_Pin  : Boolean := False;
+      Data_Ready_High : Boolean := True;
+      Interrupt_High  : Boolean := True;
+      Interrupt_Latch : Boolean := True;
+      Success         : out Boolean);
+   --  Change data ready (DRDY) and interrupt (INT) pins settings
+
    function Measuring return Boolean;
    --  Check if a measurement is in progress
 

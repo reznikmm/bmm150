@@ -28,6 +28,30 @@ package body BMM150.Internal is
       return Ok and BMM150.Raw.Get_Chip_Id (Data) = Expect;
    end Check_Chip_Id;
 
+   ---------------------------
+   -- Set_Interrupt_Setting --
+   ---------------------------
+
+   procedure Set_Interrupt_Setting
+     (Device          : Device_Context;
+      Interrupt_Pin   : Boolean := False;
+      Data_Ready_Pin  : Boolean := False;
+      Data_Ready_High : Boolean := True;
+      Interrupt_High  : Boolean := True;
+      Interrupt_Latch : Boolean := True;
+      Success         : out Boolean)
+   is
+      Data : constant BMM150.Raw.Interrupt_Setting_Data :=
+        BMM150.Raw.Set_Interrupt_Setting
+          (Interrupt_Pin   => Interrupt_Pin,
+           Data_Ready_Pin  => Data_Ready_Pin,
+           Data_Ready_High => Data_Ready_High,
+           Interrupt_High  => Interrupt_High,
+           Interrupt_Latch => Interrupt_Latch);
+   begin
+      Write (Device, Data'First, Data (Data'First), Success);
+   end Set_Interrupt_Setting;
+
    ---------------------
    -- Set_Repetitions --
    ---------------------
