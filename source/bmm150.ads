@@ -69,6 +69,17 @@ package BMM150 is
    end record;
    --  3D vector of magnetic flux density in uT (micro-tesla)
 
+   type Optional_Magnetic_Field_Vector is private;
+   --  Magnetic field vector with overflow flag
+
+   function Has_Overflow (V : Optional_Magnetic_Field_Vector) return Boolean;
+   --  Check if vector any magnetic field component of V has overflow
+
+   function To_Magnetic_Field_Vector
+     (V : Optional_Magnetic_Field_Vector) return Magnetic_Field_Vector
+       with Pre => not Has_Overflow (V);
+   --  Fetch magnetic field vector from V if it has no overflow
+
    subtype Raw_XY is Interfaces.Integer_16 range -(2 ** 12) .. 2 ** 12 - 1;
    subtype Raw_Z  is Interfaces.Integer_16 range -(2 ** 14) .. 2 ** 14 - 1;
 
@@ -77,6 +88,10 @@ package BMM150 is
       Z    : Raw_Z;
    end record;
    --  3D vector of magnetic flux density as provided by the sensor
+
+   function Has_Overflow
+     (V : Raw_Density_Vector) return Boolean is
+       (V.X = Raw_XY'First or V.Y = Raw_XY'First or Raw_Z'First = V.Z);
 
    subtype Raw_Hall is Interfaces.Unsigned_16 range 0 .. 2 ** 14 - 1;
    --  Hall resistor as provided by the sensor
@@ -93,5 +108,20 @@ package BMM150 is
    --  elements are corresponding register values.
 
    BMM150_Chip_Id : constant := 16#32#;
+
+private
+
+   type Optional_Magnetic_Field_Vector is record
+      X, Y, Z : Magnetic_Field;
+      Overflow : Boolean;  --  Any of X, Y, Z has overflow
+   end record;
+
+   function Has_Overflow
+     (V : Optional_Magnetic_Field_Vector) return Boolean is
+       (V.Overflow);
+
+   function To_Magnetic_Field_Vector
+     (V : Optional_Magnetic_Field_Vector) return Magnetic_Field_Vector is
+       (V.X, V.Y, V.Z);
 
 end BMM150;

@@ -25,7 +25,7 @@ procedure Main is
 
    Ok    : Boolean;
    Trim  : BMM150.Trim_Registers;
-   Value : BMM150.Magnetic_Field_Vector;
+   Value : BMM150.Optional_Magnetic_Field_Vector;
 
 begin
    STM32.Board.Initialize_LEDs;
@@ -75,8 +75,17 @@ begin
       BMM150_I2C.Read_Measurement (Value, Trim, Ok);
 
       if Ok then
-         Ada.Text_IO.Put_Line
-           (Value.X'Image & ", " & Value.Y'Image & ", " & Value.Z'Image);
+         if BMM150.Has_Overflow (Value) then
+            Ada.Text_IO.Put_Line ("Overflow!");
+         else
+            declare
+               V : constant BMM150.Magnetic_Field_Vector :=
+                 BMM150.To_Magnetic_Field_Vector (Value);
+            begin
+               Ada.Text_IO.Put_Line
+                 (V.X'Image & ", " & V.Y'Image & ", " & V.Z'Image);
+            end;
+         end if;
       end if;
 
       Next := Next + Ada.Real_Time.Milliseconds (500);

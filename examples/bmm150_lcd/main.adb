@@ -227,16 +227,16 @@ procedure Main is
 
    function Read_Sensor return BMM150.Magnetic_Field_Vector is
       Ok     : Boolean;
-      Result : BMM150.Magnetic_Field_Vector;
+      Result : BMM150.Optional_Magnetic_Field_Vector;
    begin
       for J in 1 .. 2_000 loop
          exit when not Sensor.Measuring;
       end loop;
 
       Sensor.Read_Measurement (Result, Ok);
-      pragma Assert (Ok);
+      pragma Assert (Ok and not BMM150.Has_Overflow (Result));
 
-      return Result;
+      return BMM150.To_Magnetic_Field_Vector (Result);
    end Read_Sensor;
 
    LCD : constant not null HAL.Bitmap.Any_Bitmap_Buffer :=

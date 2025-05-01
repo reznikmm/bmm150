@@ -105,12 +105,12 @@ package BMM150.Raw is
 
    function Get_Measurement
      (Raw  : Byte_Array;
-      Trim : Trim_Registers) return Magnetic_Field_Vector
-     with Pre => Is_Valid (Raw) and then
+      Trim : Trim_Registers) return Optional_Magnetic_Field_Vector
+     with Pre =>
        Measurement_Data'First in Raw'Range and then
        Measurement_Data'Last in Raw'Range;
    --  Decode raw measurement. Raw data should contain Measurement_Data'Range
-   --  items and hall resistance /= 0.
+   --  items. If hall resistance = 0 then overflow value is returned.
 
    subtype Trim_Registers_Data is Byte_Array (16#5D# .. 16#71#);
    --  Calibration constants registers

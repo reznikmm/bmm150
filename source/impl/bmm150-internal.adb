@@ -125,7 +125,7 @@ package body BMM150.Internal is
    procedure Read_Measurement
      (Device  : Device_Context;
       Trim    : Trim_Registers;
-      Value   : out Magnetic_Field_Vector;
+      Value   : out Optional_Magnetic_Field_Vector;
       Success : out Boolean)
    is
       Data : BMM150.Raw.Measurement_Data;
@@ -135,7 +135,7 @@ package body BMM150.Internal is
       if Success and then BMM150.Raw.Is_Valid (Data) then
          Value := BMM150.Raw.Get_Measurement (Data, Trim);
       else
-         Value := (others => Magnetic_Field'First);
+         Value := (X | Y | Z => 0.0, Overflow => True);
          Success := False;
       end if;
    end Read_Measurement;

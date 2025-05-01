@@ -12,20 +12,22 @@ package body BMM150.Raw is
    subtype Fixed_14_Unit is Fixed_14 range -1.0 + Small_14 .. 1.0 - Small_14;
 
    procedure Compensate_XY
-     (X      : Raw_XY;
-      A0     : Fixed_14_Unit;
-      Reg    : Trim_Registers;
-      X_1    : Interfaces.Integer_8;
-      X_2    : Interfaces.Integer_8;
-      Result : out Magnetic_Field)
+     (X        : Raw_XY;
+      A0       : Fixed_14_Unit;
+      Reg      : Trim_Registers;
+      X_1      : Interfaces.Integer_8;
+      X_2      : Interfaces.Integer_8;
+      Result   : out Magnetic_Field;
+      Overflow : in out Boolean)
         with SPARK_Mode, Inline;
    --  Part of compensation procedure for X and Y
 
    procedure Compensate_Z
-     (Z      : Raw_Z;
-      Hall   : Raw_Hall;
-      Reg    : Trim_Registers;
-      Result : out Magnetic_Field)
+     (Z        : Raw_Z;
+      Hall     : Raw_Hall;
+      Reg      : Trim_Registers;
+      Result   : out Magnetic_Field;
+      Overflow : in out Boolean)
         with SPARK_Mode, Inline;
    --  Part of compensation procedure for Z
 
@@ -34,12 +36,13 @@ package body BMM150.Raw is
    -------------------
 
    procedure Compensate_XY
-     (X      : Raw_XY;
-      A0     : Fixed_14_Unit;
-      Reg    : Trim_Registers;
-      X_1    : Interfaces.Integer_8;
-      X_2    : Interfaces.Integer_8;
-      Result : out Magnetic_Field)
+     (X        : Raw_XY;
+      A0       : Fixed_14_Unit;
+      Reg      : Trim_Registers;
+      X_1      : Interfaces.Integer_8;
+      X_2      : Interfaces.Integer_8;
+      Result   : out Magnetic_Field;
+      Overflow : in out Boolean)
    is
       pragma SPARK_Mode;
       pragma Suppress (All_Checks);
@@ -89,7 +92,8 @@ package body BMM150.Raw is
       then
          Result := Magnetic_Field (A8);
       else
-         Result := Magnetic_Field'First;
+         Result := 0.0;
+         Overflow := True;
       end if;
    end Compensate_XY;
 
@@ -98,10 +102,11 @@ package body BMM150.Raw is
    ------------------
 
    procedure Compensate_Z
-     (Z      : Raw_Z;
-      Hall   : Raw_Hall;
-      Reg    : Trim_Registers;
-      Result : out Magnetic_Field)
+     (Z        : Raw_Z;
+      Hall     : Raw_Hall;
+      Reg      : Trim_Registers;
+      Result   : out Magnetic_Field;
+      Overflow : in out Boolean)
    is
       type Wide_Fixed_4 is delta Small_4
         range -2.0 ** 27 .. 2.0 ** 27 - Small_4;
@@ -151,10 +156,10 @@ package body BMM150.Raw is
       then
          Result := Magnetic_Field (A5);
       else
-         Result := Magnetic_Field'First;
+         Result := 0.0;
+         Overflow := True;
       end if;
    end Compensate_Z;
-
 
    ---------------------
    -- Get_Measurement --
@@ -162,26 +167,31 @@ package body BMM150.Raw is
 
    function Get_Measurement
      (Raw  : Byte_Array;
-      Trim : Trim_Registers) return Magnetic_Field_Vector
+      Trim : Trim_Registers) return Optional_Magnetic_Field_Vector
    is
-      Value  : Magnetic_Field_Vector;
-      Data   : Raw_Density_Vector;
-      R_Hall : BMM150.Raw_Hall;
-      Hall   : Fixed_14_Unit;
-      A0     : Fixed_14_Unit;
-      XYZ1   : constant Fixed_14_Unit :=
+      Value    : Magnetic_Field_Vector;
+      Overflow : Boolean := False;
+      Data     : Raw_Density_Vector;
+      R_Hall   : BMM150.Raw_Hall;
+      Hall     : Fixed_14_Unit;
+      A0       : Fixed_14_Unit;
+      XYZ1     : constant Fixed_14_Unit :=
         Fixed_14_Unit'Small * Positive (Trim.XYZ1);
    begin
       Get_Raw_Measurement (Raw, Data, R_Hall);
 
+      if R_Hall = 0 then
+         return (0.0, 0.0, 0.0, Overflow => True);
+      end if;
+
       Hall := Fixed_14_Unit'Small * Positive (R_Hall);
       A0 := XYZ1 / Hall - 1.0;
 
-      Compensate_XY (Data.X, A0, Trim, Trim.X1, Trim.X2, Value.X);
-      Compensate_XY (Data.Y, A0, Trim, Trim.Y1, Trim.Y2, Value.Y);
-      Compensate_Z (Data.Z, R_Hall, Trim, Value.Z);
+      Compensate_XY (Data.X, A0, Trim, Trim.X1, Trim.X2, Value.X, Overflow);
+      Compensate_XY (Data.Y, A0, Trim, Trim.Y1, Trim.Y2, Value.Y, Overflow);
+      Compensate_Z (Data.Z, R_Hall, Trim, Value.Z, Overflow);
 
-      return Value;
+      return (Value.X, Value.Y, Value.Z, Overflow);
    end Get_Measurement;
 
    -------------------------

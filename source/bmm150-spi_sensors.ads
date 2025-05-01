@@ -72,7 +72,7 @@ package BMM150.SPI_Sensors is
 
    procedure Read_Measurement
      (Self    : BMM150_Sensor;
-      Value   : out Magnetic_Field_Vector;
+      Value   : out Optional_Magnetic_Field_Vector;
       Success : out Boolean);
    --  Read the measurement values from the sensor and make the temperature
    --  compensation for X, Y and Z.

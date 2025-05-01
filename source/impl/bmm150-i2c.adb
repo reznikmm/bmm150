@@ -73,7 +73,7 @@ package body BMM150.I2C is
    ----------------------
 
    procedure Read_Measurement
-     (Value   : out Magnetic_Field_Vector;
+     (Value   : out Optional_Magnetic_Field_Vector;
       Trim    : Trim_Registers;
       Success : out Boolean) is
    begin

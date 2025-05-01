@@ -71,7 +71,7 @@ package body BMM150.I2C_Sensors is
 
    procedure Read_Measurement
      (Self    : BMM150_Sensor;
-      Value   : out Magnetic_Field_Vector;
+      Value   : out Optional_Magnetic_Field_Vector;
       Success : out Boolean) is
    begin
       Sensor.Read_Measurement (Self, Self.Trim, Value, Success);
