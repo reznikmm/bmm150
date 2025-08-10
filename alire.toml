@@ -10,6 +10,25 @@ website = "https://github.com/reznikmm/bmm150"
 tags = ["sensor", "magnetometer", "driver"]
 project-files = ["gnat/bmm150.gpr"]
 
+long-description = '''
+# Driver for BMM150 magnetic sensor.
+
+The BMM150 driver enables the following functionalities:
+
+- Detect the presence of the sensor.
+- Perform soft reset
+- Configure the sensor (power mode, output data rate, repetitions per
+  measurement)
+- Conduct measurements as raw 13-bit (15 for Z) values and scaled values
+  with temperature compensation.
+
+The driver supports usage both with and without the Ada Driver Library,
+either via generic instantiation or by instantiating tagged type object.
+
+More drivers in this style:
+[driver index](https://github.com/reznikmm/reznikmm/blob/main/drivers.md).
+'''
+
 [configuration]
 output_dir = "gnat"
 generate_ada = false
