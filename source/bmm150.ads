@@ -39,7 +39,7 @@ package BMM150 is
    Enhanced_Regular_Preset : constant Setting := (X_Y => 15, Z => 27);
    --  Noise: 0.5/0.5 uT, current 0.80 mA at ODR 10 Hz
 
-   High_Accuracy_Preset    : constant Setting := (X_Y => 15, Z => 27);
+   High_Accuracy_Preset    : constant Setting := (X_Y => 47, Z => 83);
    --  Noise: 0.3/0.3 uT, current 4.90 mA at ODR 20 Hz
 
    use type Interfaces.Integer_16;
