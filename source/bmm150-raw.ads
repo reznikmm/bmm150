@@ -169,7 +169,7 @@ private
       ((Raw (Suspend_Data'First) and 16#82#) /= 0);
 
    function Set_Repetitions (Preset : Setting) return Repetitions_Data is
-      (Byte (Preset.X_Y / 2), Byte (Preset.Z / 2));
+      (Byte (Preset.X_Y / 2), Byte (Preset.Z - 1));
 
    function Is_Measuring (Raw : Byte_Array) return Boolean is
       ((Raw (16#48#) and 1) = 0);
