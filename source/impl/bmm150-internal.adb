@@ -61,13 +61,15 @@ package body BMM150.Internal is
       Preset  : Setting;
       Success : out Boolean)
    is
-      Data : constant BMM150.Raw.Repetitions_Data :=
-        BMM150.Raw.Set_Repetitions (Preset);
+      XY_Data : constant BMM150.Raw.XY_Repetitions_Data :=
+        BMM150.Raw.Set_XY_Repetitions (Preset);
+      Z_Data : constant BMM150.Raw.Z_Repetitions_Data :=
+        BMM150.Raw.Set_Z_Repetitions (Preset);
    begin
-      Write (Device, Data'First, Data (Data'First), Success);
+      Write (Device, XY_Data'First, XY_Data (XY_Data'First), Success);
 
       if Success then
-         Write (Device, Data'Last, Data (Data'Last), Success);
+         Write (Device, Z_Data'Last, Z_Data (Z_Data'Last), Success);
       end if;
    end Set_Repetitions;
 

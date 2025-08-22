@@ -54,11 +54,17 @@ package BMM150.Raw is
        with Pre => Chip_Id_Data'First in Raw'Range;
    --  Read the chip ID. Raw data should contain Chip_Id_Data'First item.
 
-   subtype Repetitions_Data is Byte_Array (16#51# .. 16#52#);
-   --  Number of repetitions control registers
+   subtype XY_Repetitions_Data is Byte_Array (16#51# .. 16#51#);
+   --  Number of XY repetitions control register
 
-   function Set_Repetitions (Preset : Setting) return Repetitions_Data;
-   --  Set the number of repetitions per measurement
+   function Set_XY_Repetitions (Preset : Setting) return XY_Repetitions_Data;
+   --  Set the number of XY repetitions per measurement
+
+   subtype Z_Repetitions_Data is Byte_Array (16#52# .. 16#52#);
+   --  Number of Z repetitions control register
+
+   function Set_Z_Repetitions (Preset : Setting) return Z_Repetitions_Data;
+   --  Set the number of Z repetitions per measurement
 
    subtype Power_Mode_Data is Byte_Array (16#4C# .. 16#4C#);
    --  Register (0x4C) contains control bits for operation mode, output data
@@ -138,7 +144,8 @@ package BMM150.Raw is
    --  the highest bit on (1).
 
    function SPI_Write (X : Byte_Array) return Byte_Array is
-     ((X'First - 1 => SPI_Write (X'First)) & X);
+     ((X'First - 1 => SPI_Write (X'First)) & X)
+       with Pre => X'Length = 1;
    --  Prefix the byte array with the register address for the SPI write
    --  operation
 
@@ -148,7 +155,8 @@ package BMM150.Raw is
    --  operation
 
    function I2C_Write (X : Byte_Array) return Byte_Array is
-     ((X'First - 1 => Byte (X'First)) & X);
+     ((X'First - 1 => Byte (X'First)) & X)
+       with Pre => X'Length = 1;
    --  Prefix the byte array with the register address for the I2C write
    --  operation
 
@@ -161,15 +169,19 @@ private
    function Set_Suspend
      (Suspend    : Boolean;
       SPI_3_Wire : Boolean := False) return Suspend_Data is
-        (16#4B# => (if Suspend then 0 elsif SPI_3_Wire then 4 else 1));
+        (Suspend_Data'First =>
+          (if Suspend then 0 elsif SPI_3_Wire then 4 else 1));
 
-   function Reset return Suspend_Data is (16#4B# => 16#83#);
+   function Reset return Suspend_Data is (Suspend_Data'First => 16#83#);
 
    function Is_Reseting (Raw : Byte_Array) return Boolean is
       ((Raw (Suspend_Data'First) and 16#82#) /= 0);
 
-   function Set_Repetitions (Preset : Setting) return Repetitions_Data is
-      (Byte (Preset.X_Y / 2), Byte (Preset.Z - 1));
+   function Set_XY_Repetitions (Preset : Setting) return XY_Repetitions_Data is
+      (XY_Repetitions_Data'First => Byte (Preset.X_Y / 2));
+
+   function Set_Z_Repetitions (Preset : Setting) return Z_Repetitions_Data is
+      (Z_Repetitions_Data'First => Byte (Preset.Z - 1));
 
    function Is_Measuring (Raw : Byte_Array) return Boolean is
       ((Raw (16#48#) and 1) = 0);
