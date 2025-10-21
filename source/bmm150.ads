@@ -6,7 +6,7 @@
 with Interfaces;
 
 package BMM150 is
-   pragma Preelaborate;
+   pragma Pure;
    pragma Discard_Names;
 
    type Power_Mode is (Normal, Forced, Sleep);
