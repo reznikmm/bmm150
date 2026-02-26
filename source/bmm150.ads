@@ -1,4 +1,4 @@
---  SPDX-FileCopyrightText: 2023 Max Reznik <reznikmm@gmail.com>
+--  SPDX-FileCopyrightText: 2023-2026 Max Reznik <reznikmm@gmail.com>
 --
 --  SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 ----------------------------------------------------------------
@@ -94,7 +94,13 @@ package BMM150 is
        (V.X = Raw_XY'First or V.Y = Raw_XY'First or Raw_Z'First = V.Z);
 
    subtype Raw_Hall is Interfaces.Unsigned_16 range 0 .. 2 ** 14 - 1;
-   --  Hall resistor as provided by the sensor
+   --  Hall sensor plate resistance as provided by the sensor
+
+   function To_Magnetic_Field_Vector
+     (Raw    : Raw_Density_Vector;
+      R_Hall : BMM150.Raw_Hall;
+      Trim   : Trim_Registers) return Optional_Magnetic_Field_Vector;
+   --  Convert raw values to magnetic field vector
 
    subtype I2C_Address_Range is Interfaces.Unsigned_8 range 16#10# .. 16#13#;
 
